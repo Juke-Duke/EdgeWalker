@@ -1,0 +1,342 @@
+Program
+    : EdgeDeclaration* AliasDeclaration* ProcedureBody
+    ;
+
+Library
+    : EdgeDeclaration* AliasDeclaration* ModuleDeclaration+
+    ;
+
+EdgeDeclaration
+    : 'edge' Path ';'
+    ;
+
+AliasDeclaration
+    : 'alias' Identifier '=' Path ';'
+    ;
+
+Identifier
+    : [\x]+ [\x\d_]*
+    ;
+
+Path
+    : ModulePath
+    | ModulePath '.' Identifier
+    | ModulePath '.' Identifier '<' ','* '>'
+    ;
+
+ModulePath
+    : Identifier ('/' Identifier)*
+    ;
+
+TypePath
+    : (ModulePath '.')? Identifier
+    | (ModulePath '.')? Identifier '<' Type (',' Type)* '>'
+    ;
+
+Type
+    : TypePath '?'?
+    | TupleType '?'?
+    | ListType '?'?
+    | SetType '?'?
+    | MapType '?'?
+    | LambdaType
+    ;
+
+TupleType
+    : '(' ')'
+    | '(' Type (',' Type)* ')'
+    ;
+
+ListType
+    : '[' Type ']'
+    ;
+
+SetType
+    : '{' Type '}'
+    ;
+
+MapType
+    : '{' Type ':' Type '}'
+    ;
+
+LambdaType
+    : '(' Parameters? ')' '?'? ':' Type
+    | '<' TypeParameters '>' '(' Parameters? ')' '?'? ':' Type
+    ;
+
+ModuleDeclaration
+    : Attribute* 'module' ModulePath ';'
+    | SubModuleDeclaration
+    ;
+
+SubModuleDeclaration
+    : Attribute* 'module' ModulePath '{' ModuleBody? '}'
+    ;
+
+ModuleBody
+    : VariableDeclaration*
+    | ConstantDeclaration*
+    | ProcedureDeclaration*
+    | InterfaceDeclaration*
+    | TypeDeclaration*
+    | ExtensionDeclaration*
+    | UnionDeclaration*
+    | EnumDeclaration*
+    ;
+
+Attribute
+    : '@' TypePath
+    | '@' TypePath '(' Arguments ')'
+    ;
+
+VariableDeclaration
+    : Attribute* 'var' Identifier ':' Type ';'
+    | Attribute* 'var' Identifier '=' Expression ';'
+    | Attribute* 'var' Identifier ':' Type '=' Expression ';'
+    ;
+
+ConstantDeclaration
+    : Attribute* 'const' Identifier '=' Expression ';'
+    | Attribute* 'const' Identifier ':' Type '=' Expression ';'
+    ;
+
+ProcedureDeclaration
+    : Attribute* 'proc' Identifier '(' Parameters? ')' ':' Type '=>' Expression ';'
+    | Attribute* 'proc' Identifier '(' Parameters? ')' ':' Type '{' ProcedureBody? '}'
+    | Attribute* 'proc' Identifier '<' TypeParameters '>' '(' Parameters? ')' ':' Type '=>' Expression ';'
+    | Attribute* 'proc' Identifier '<' TypeParameters '>' '(' Parameters? ')' ':' Type '{' ProcedureBody? '}'
+    ;
+
+Parameters
+    : Parameter (',' Parameter)*
+    ;
+
+Parameter
+    : Attribute* Identifier ':' Type
+    | Attribute* Identifier ':' Type '..'
+    | Attribute* Identifier ':' Type '=' Expression
+    ;
+
+TypeParameters
+    : TypeParameter (',' TypeParameter)*
+    ;
+
+TypeParameter
+    : Identifier
+    | Identifier ':' TypePath ('&' TypePath)*
+    ;
+
+ProcedureBody
+    : VariableDeclaration*
+    | ConstantDeclaration*
+    | ProcedureDeclaration*
+    | IfExpression*
+    | MatchExpression*
+    | IterationExpression*
+    | ReturnStatement
+    ;
+
+IfExpression
+    : 'if' Expression '{' ControlFlowBody '}' ('else' 'if' '{' ControlFlowBody '}')* ('else' '{' ControlFlowBody '}')?
+    ;
+
+MatchExpression
+    : 'match' Expression '{' MatchCases '}'
+    ;
+
+MatchCases
+    : MatchCase (',' MatchCase)*
+    ;
+
+MatchCase
+    : (Expression | '_') '=>' Expression ';'
+    | (Expression | '_') '=>' '{' ControlFlowBody '}'
+    ;
+
+IterationExpression
+    : (Label ':')? LoopExpression
+    | (Label ':')? WhileExpression
+    | (Label ':')? DoWhileExpression
+    | (Label ':')? ForExpression
+    ;
+
+Label
+    : \w
+    ;
+
+LoopExpression
+    : 'loop' '{' ControlFlowBody '}'
+    ;
+
+WhileExpression
+    : 'while' Expression '{' ControlFlowBody '}'
+    ;
+
+DoWhileExpression
+    : 'do' '{' ControlFlowBody '}' 'while' Expression ';'
+    ;
+
+ForExpression
+    : 'for' Identifier 'in' Expression ('if' Expression)? '{' ControlFlowBody '}'
+    ;
+
+ControlFlowBody
+    : VariableDeclaration*
+    | ConstantDeclaration*
+    | IfExpression*
+    | MatchExpression*
+    | IterationExpression*
+    | ContinueStatement
+    | BreakStatement
+    | ReturnStatement
+    ;
+
+ContinueStatement
+    : 'continue' ';'
+    ;
+
+BreakStatement
+    : 'break' Label? ';'
+    | 'break' Expression? ';'
+    ;
+
+ReturnStatement
+    : 'return' Expression? ';'
+    ;
+
+InterfaceDeclaration
+    : Attribute* 'interface' Identifier '{' InterfaceBody? '}'
+    | Attribute* 'interface' Identifier '<' TypeParameters'>' '{' InterfaceBody '}'
+    ;
+
+InterfaceBody
+    : PropertySignature*
+    | IndexerSignature*
+    | MethodSignature*
+    | ConstructorSignature*
+    | ProcedureSignature*
+    ;
+
+PropertySignature
+    : Identifier ':' Type '{' AccessorSignature (',' AccessorSignature)? '}'
+    ;
+
+IndexerSignature
+    : '[' Parameters ']' ':' Type '{' AccessorSignature (',' AccessorSignature)? '}'
+    ;
+
+AccessorSignature
+    : 'get' '(' Mutability ')' ';'
+    | 'set' '(' Mutability ')' ';'
+    ;
+
+Mutability
+    : 'var' 'self'
+    | 'const' 'self'
+    ;
+
+MethodSignature
+    : 'proc' Identifier '(' Mutability (',' Parameters)? ')' ':' Type ';'
+    | 'proc' Identifier '<' TypeParameters '>' '(' Mutability (',' Parameters)? ')' ':' Type ';'
+    ;
+
+ConstructorSignature
+    : Identifier '(' ConstructorParameters? ')' ';'
+    ;
+
+ConstructorParameters
+    : (PrimaryParameter | Parameter) (',' (PrimaryParameter | Parameter))*
+    ;
+
+PrimaryParameter
+    : 'self' '.' Identifier
+    | 'self' '.' Identifier '=' Expression
+    ;
+
+TypeDeclaration
+    : UnitTypeDeclaration
+    | DataTypeDeclaration
+    | SignatureTypeDeclaration
+    ;
+
+UnitTypeDeclaration
+    : Attribute* 'type' Identifier ';'
+    ;
+
+DataTypeDeclaration
+    : Attribute* 'type' Identifier '{' Component* '}'
+    | Attribute* 'type' Identifier '<' TypeParameters '>' '{' Component* '}'
+    ;
+
+Component
+    : Attribute* Identifier ':' Type ';'
+    ;
+
+SignatureTypeDeclaration
+    : Attribute* 'type' Identifier '(' Parameters? ')' ':' ModulePath ';'
+    | Attribute* 'type' Identifier '<' TypeParameters '>' '(' Parameters? ')' ':' ModulePath ';'
+    ;
+
+ExtensionDeclaration
+    : Attribute* 'extend' Type '{' ExtensionBody? '}'
+    | Attribute* 'extend' Type '<' TypeParameters '>' '{' ExtensionBody? '}'
+    | Attribute* 'extend' Type 'as' TypePath '{' ExtensionBody? '}'
+    | Attribute* 'extend' Type '<' TypeParameters '>' 'as' TypePath '{' ExtensionBody? '}'
+    ;
+
+ExtensionBody
+    : VariableDeclaration*
+    | ConstantDeclaration*
+    | PropertyDeclaration*
+    | ConstructorDeclaration*
+    | MethodDeclaration*
+    | ProcedureDeclaration*
+    ;
+
+PropertyDeclaration
+    : Identifier ':' Type '{' AccessorDeclaration (',' AccessorDeclaration)? '}'
+    ;
+
+AccessorDeclaration
+    : Attribute* 'get' '(' Mutability ')' '=>' Expression ';'
+    | Attribute* 'get' '(' Mutability ')' '{' ProcedureBody? '}'
+    | Attribute* 'set' '(' Mutability ')' '=>' Expression ';'
+    | Attribute* 'set' '(' Mutability ')' '{' ProcedureBody? '}'
+    ;
+
+ConstructorDeclaration
+    : Identifier '(' ConstructorParameters? ')' ('as' InvocationExpression)? ';'
+    | Identifier '(' ConstructorParameters? ')' ('as' InvocationExpression)? '=>' Expression ';'
+    | Identifier '(' ConstructorParameters? ')' ('as' InvocationExpression)? '{' ProcedureBody? '}'
+    ;
+
+MethodDeclaration
+    : 'proc' Identifier '(' MethodParameters ')' ':' Type '=>' Expression ';'
+    | 'proc' Identifier '(' MethodParameters ')' ':' Type '{' ProcedureBody? '}'
+    | 'proc' Identifier '<' TypeParameters '>' '(' MethodParameters ')' ':' Type '=>' Expression ';'
+    | 'proc' Identifier '<' TypeParameters '>' '(' MethodParameters ')' ':' Type '{' ProcedureBody? '}'
+    ;
+
+MethodParameters
+    : Mutability (',' Parameter)*
+    ;
+
+UnionDeclaration
+    : Attribute* 'union' Identifier '=' UnionTypes ';'
+    ;
+
+UnionTypes
+    : '|'? Type ('|' Type)*
+    ;
+
+EnumDeclaration
+    : Attribute* 'enum' Identifier ('as' Type)? '{' EnumBody? '}'
+    ;
+
+EnumBody
+    : Identifier ('=' Expression)? (',' Identifier ('=' Expression)?)*
+    ;
+
+Expression
+    : AssignmentExpression
+    ;
