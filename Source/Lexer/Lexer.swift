@@ -123,7 +123,7 @@ struct Lexer
                     ?? Tokenize(kind: .Identifier)
 
             case "p":
-                return Tokenize(kind: .ProcedureKeyword)
+                return Tokenize(kind: .ProcKeyword)
                     ?? Tokenize(kind: .Identifier)
 
             case "i":
@@ -184,6 +184,7 @@ struct Lexer
             case "=":
                 return Tokenize(kind: .EqualOperator)
                     ?? Tokenize(kind: .AssignOperator)
+                    ?? Tokenize(kind: .LambdaOperator)
 
             case "!":
                 return Tokenize(kind: .NotEqualOperator)

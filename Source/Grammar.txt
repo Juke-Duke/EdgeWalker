@@ -7,21 +7,21 @@ Library
     ;
 
 EdgeDeclaration
-    : 'edge' Path ';'
+    : 'edge' EdgePath ';'
     ;
 
 AliasDeclaration
-    : 'alias' Identifier '=' Path ';'
+    : 'alias' Identifier '=' (ModulePath | TypePath) ';'
+    ;
+
+EdgePath
+    : ModulePath
+    | ModulePath '.' Identifier
+    | ModulePath '.' Identifier '<' ','* '>'
     ;
 
 Identifier
     : [\x]+ [\x\d_]*
-    ;
-
-Path
-    : ModulePath
-    | ModulePath '.' Identifier
-    | ModulePath '.' Identifier '<' ','* '>'
     ;
 
 ModulePath
@@ -60,8 +60,8 @@ MapType
     ;
 
 LambdaType
-    : '(' Parameters? ')' '?'? ':' Type
-    | '<' TypeParameters '>' '(' Parameters? ')' '?'? ':' Type
+    : 'async'? '(' Parameters? ')' '?'? ':' Type
+    | 'async'? '<' TypeParameters '>' '(' Parameters? ')' '?'? ':' Type
     ;
 
 ModuleDeclaration
@@ -89,6 +89,14 @@ Attribute
     | '@' TypePath '(' Arguments ')'
     ;
 
+Arguments
+    : Argument (',' Argument)*
+    ;
+
+Argument
+    : Identifier ':' Expression
+    ;
+
 VariableDeclaration
     : Attribute* 'var' Identifier ':' Type ';'
     | Attribute* 'var' Identifier '=' Expression ';'
@@ -101,10 +109,10 @@ ConstantDeclaration
     ;
 
 ProcedureDeclaration
-    : Attribute* 'proc' Identifier '(' Parameters? ')' ':' Type '=>' Expression ';'
-    | Attribute* 'proc' Identifier '(' Parameters? ')' ':' Type '{' ProcedureBody? '}'
-    | Attribute* 'proc' Identifier '<' TypeParameters '>' '(' Parameters? ')' ':' Type '=>' Expression ';'
-    | Attribute* 'proc' Identifier '<' TypeParameters '>' '(' Parameters? ')' ':' Type '{' ProcedureBody? '}'
+    : Attribute* 'async'? 'proc' Identifier '(' Parameters? ')' ':' Type '=>' Expression ';'
+    | Attribute* 'async'? 'proc' Identifier '(' Parameters? ')' ':' Type '{' ProcedureBody? '}'
+    | Attribute* 'async'? 'proc' Identifier '<' TypeParameters '>' '(' Parameters? ')' ':' Type '=>' Expression ';'
+    | Attribute* 'async'? 'proc' Identifier '<' TypeParameters '>' '(' Parameters? ')' ':' Type '{' ProcedureBody? '}'
     ;
 
 Parameters
@@ -122,8 +130,8 @@ TypeParameters
     ;
 
 TypeParameter
-    : Identifier
-    | Identifier ':' TypePath ('&' TypePath)*
+    : Attribute* Identifier
+    | Attribute* Identifier ':' TypePath ('&' TypePath)*
     ;
 
 ProcedureBody
@@ -134,6 +142,12 @@ ProcedureBody
     | MatchExpression*
     | IterationExpression*
     | ReturnStatement
+    | ExpressionStatement
+    ;
+
+ExpressionStatement
+    : AssignmentExpression ';'
+    | UnaryPostfixExpression ';'
     ;
 
 IfExpression
@@ -218,16 +232,16 @@ InterfaceBody
     ;
 
 PropertySignature
-    : Identifier ':' Type '{' AccessorSignature (',' AccessorSignature)? '}'
+    : Attribute* Identifier ':' Type '{' AccessorSignature (',' AccessorSignature)? '}'
     ;
 
 IndexerSignature
-    : '[' Parameters ']' ':' Type '{' AccessorSignature (',' AccessorSignature)? '}'
+    : Attribute* '[' Parameters? ']' ':' Type '{' AccessorSignature (',' AccessorSignature)? '}'
     ;
 
 AccessorSignature
-    : 'get' '(' Mutability ')' ';'
-    | 'set' '(' Mutability ')' ';'
+    : Attribute* 'get' '(' Mutability ')' ';'
+    | Attribute* 'set' '(' Mutability ')' ';'
     ;
 
 Mutability
@@ -236,12 +250,12 @@ Mutability
     ;
 
 MethodSignature
-    : 'proc' Identifier '(' Mutability (',' Parameters)? ')' ':' Type ';'
-    | 'proc' Identifier '<' TypeParameters '>' '(' Mutability (',' Parameters)? ')' ':' Type ';'
+    : Attribute* 'proc' Identifier '(' Mutability (',' Parameters)? ')' ':' Type ';'
+    | Attribute* 'proc' Identifier '<' TypeParameters '>' '(' Mutability (',' Parameters)? ')' ':' Type ';'
     ;
 
 ConstructorSignature
-    : Identifier '(' ConstructorParameters? ')' ';'
+    : Attribute* Identifier '(' ConstructorParameters? ')' ';'
     ;
 
 ConstructorParameters
@@ -249,22 +263,13 @@ ConstructorParameters
     ;
 
 PrimaryParameter
-    : 'self' '.' Identifier
-    | 'self' '.' Identifier '=' Expression
+    : Attribute* 'self' '.' Identifier
+    | Attribute* 'self' '.' Identifier '=' Expression
     ;
 
 TypeDeclaration
-    : UnitTypeDeclaration
-    | DataTypeDeclaration
-    | SignatureTypeDeclaration
-    ;
-
-UnitTypeDeclaration
     : Attribute* 'type' Identifier ';'
-    ;
-
-DataTypeDeclaration
-    : Attribute* 'type' Identifier '{' Component* '}'
+    | Attribute* 'type' Identifier '{' Component* '}'
     | Attribute* 'type' Identifier '<' TypeParameters '>' '{' Component* '}'
     ;
 
@@ -272,15 +277,10 @@ Component
     : Attribute* Identifier ':' Type ';'
     ;
 
-SignatureTypeDeclaration
-    : Attribute* 'type' Identifier '(' Parameters? ')' ':' ModulePath ';'
-    | Attribute* 'type' Identifier '<' TypeParameters '>' '(' Parameters? ')' ':' ModulePath ';'
-    ;
-
 ExtensionDeclaration
     : Attribute* 'extend' Type '{' ExtensionBody? '}'
-    | Attribute* 'extend' Type '<' TypeParameters '>' '{' ExtensionBody? '}'
     | Attribute* 'extend' Type 'as' TypePath '{' ExtensionBody? '}'
+    | Attribute* 'extend' Type '<' TypeParameters '>' '{' ExtensionBody? '}'
     | Attribute* 'extend' Type '<' TypeParameters '>' 'as' TypePath '{' ExtensionBody? '}'
     ;
 
@@ -294,7 +294,7 @@ ExtensionBody
     ;
 
 PropertyDeclaration
-    : Identifier ':' Type '{' AccessorDeclaration (',' AccessorDeclaration)? '}'
+    : Attribute* Identifier ':' Type '{' AccessorDeclaration (',' AccessorDeclaration)? '}'
     ;
 
 AccessorDeclaration
@@ -305,16 +305,16 @@ AccessorDeclaration
     ;
 
 ConstructorDeclaration
-    : Identifier '(' ConstructorParameters? ')' ('as' InvocationExpression)? ';'
-    | Identifier '(' ConstructorParameters? ')' ('as' InvocationExpression)? '=>' Expression ';'
-    | Identifier '(' ConstructorParameters? ')' ('as' InvocationExpression)? '{' ProcedureBody? '}'
+    : Attribute* Identifier '(' ConstructorParameters? ')' ('as' InvocationExpression)? ';'
+    | Attribute* Identifier '(' ConstructorParameters? ')' ('as' InvocationExpression)? '=>' Expression ';'
+    | Attribute* Identifier '(' ConstructorParameters? ')' ('as' InvocationExpression)? '{' ProcedureBody? '}'
     ;
 
 MethodDeclaration
-    : 'proc' Identifier '(' MethodParameters ')' ':' Type '=>' Expression ';'
-    | 'proc' Identifier '(' MethodParameters ')' ':' Type '{' ProcedureBody? '}'
-    | 'proc' Identifier '<' TypeParameters '>' '(' MethodParameters ')' ':' Type '=>' Expression ';'
-    | 'proc' Identifier '<' TypeParameters '>' '(' MethodParameters ')' ':' Type '{' ProcedureBody? '}'
+    : Attribute* 'async'? 'proc' Identifier '(' MethodParameters ')' ':' Type '=>' Expression ';'
+    | Attribute* 'async'? 'proc' Identifier '(' MethodParameters ')' ':' Type '{' ProcedureBody? '}'
+    | Attribute* 'async'? 'proc' Identifier '<' TypeParameters '>' '(' MethodParameters ')' ':' Type '=>' Expression ';'
+    | Attribute* 'async'? 'proc' Identifier '<' TypeParameters '>' '(' MethodParameters ')' ':' Type '{' ProcedureBody? '}'
     ;
 
 MethodParameters
@@ -326,7 +326,7 @@ UnionDeclaration
     ;
 
 UnionTypes
-    : '|'? Type ('|' Type)*
+    : '|'? Attribute* Type ('|' Attribute* Type)*
     ;
 
 EnumDeclaration
@@ -334,9 +334,208 @@ EnumDeclaration
     ;
 
 EnumBody
-    : Identifier ('=' Expression)? (',' Identifier ('=' Expression)?)*
+    : Attribute* Identifier ('=' Expression)? (',' Attribute* Identifier ('=' Expression)?)*
     ;
 
 Expression
-    : AssignmentExpression
+    : ('try' | 'await') AssignmentExpression
+    ;
+
+AssignmentExpression
+    : LogicalOrExpression ('=' AssignmentExpression)?
+    | LogicalOrExpression ('+=' AssignmentExpression)?
+    | LogicalOrExpression ('-=' AssignmentExpression)?
+    | LogicalOrExpression ('*=' AssignmentExpression)?
+    | LogicalOrExpression ('/=' AssignmentExpression)?
+    | LogicalOrExpression ('%=' AssignmentExpression)?
+    | LogicalOrExpression ('&=' AssignmentExpression)?
+    | LogicalOrExpression ('|=' AssignmentExpression)?
+    | LogicalOrExpression ('^=' AssignmentExpression)?
+    | LogicalOrExpression ('<<=' AssignmentExpression)?
+    | LogicalOrExpression ('>>=' AssignmentExpression)?
+    | LogicalOrExpression ('>>>=' AssignmentExpression)?
+    ;
+
+LogicalOrExpression
+    : LogicalAndExpression ('||' LogicalAndExpression)*
+    ;
+
+LogicalAndExpression
+    : EqualityExpression ('&&' EqualityExpression)*
+    ;
+
+EqualityExpression
+    : RelationalExpression ('==' RelationalExpression)*
+    | RelationalExpression ('!=' RelationalExpression)*
+    ;
+
+RelationalExpression
+    : BitwiseOrExpression ('<' BitwiseOrExpression)*
+    | BitwiseOrExpression ('>' BitwiseOrExpression)*
+    | BitwiseOrExpression ('<=' BitwiseOrExpression)*
+    | BitwiseOrExpression ('>=' BitwiseOrExpression)*
+    | BitwiseOrExpression IsExpression*
+    | BitwiseOrExpression AsExpression*
+    ;
+
+IsExpression
+    : 'is' TypePath Identifier?
+    ;
+
+AsExpression
+    : 'as' TypePath
+    ;
+
+BitwiseOrExpression
+    : BitwiseXorExpression ('|' BitwiseXorExpression)*
+    ;
+
+BitwiseXorExpression
+    : BitwiseAndExpression ('^' BitwiseAndExpression)*
+    ;
+
+BitwiseAndExpression
+    : ShiftExpression ('&' ShiftExpression)*
+    ;
+
+ShiftExpression
+    : AdditiveExpression ('<<' AdditiveExpression)*
+    | AdditiveExpression ('>>' AdditiveExpression)*
+    | AdditiveExpression ('>>>' AdditiveExpression)*
+    ;
+
+AdditiveExpression
+    : MultiplicativeExpression ('+' MultiplicativeExpression)*
+    | MultiplicativeExpression ('-' MultiplicativeExpression)*
+    ;
+
+MultiplicativeExpression
+    : UnaryExpression ('*' UnaryExpression)*
+    | UnaryExpression ('/' UnaryExpression)*
+    | UnaryExpression ('%' UnaryExpression)*
+    ;
+
+ExpontentiationExpression
+    : UnaryPrefixExpression ('**' ExpontentiationExpression)*
+    ;
+
+UnaryPrefixExpression
+    : UnaryPostfixExpression
+    | '!' UnaryPrefixExpression
+    | '~' UnaryPrefixExpression
+    | '+' UnaryPrefixExpression
+    | '-' UnaryPrefixExpression
+    ;
+
+UnaryPostfixExpression
+    : PrimaryExpression MemberAccessExpression*
+    | PrimaryExpression IndexerExpression*
+    | PrimaryExpression InvocationExpression*
+    ;
+
+MemberAccessExpression
+    : '.' Identifier
+    | '?.' Identifier
+    ;
+
+IndexerExpression
+    : '[' Expression ']'
+    | '?[' Expression ']'
+    ;
+
+InvocationExpression
+    : '(' Arguments? ')'
+    | '?(' Arguments? ')'
+    ;
+
+PrimaryExpression
+    : Literal
+    | Identifier
+    | '(' Expression ')'
+    ;
+
+Literal
+    : NullLiteral
+    | BooleanLiteral
+    | NumericLiteral
+    | CharacterLiteral
+    | TextLiteral
+    | RegexLiteral
+    | TupleLiteral
+    | ListLiteral
+    | SetLiteral
+    | MapLiteral
+    | RangeLiteral
+    ;
+
+NullLiteral
+    : 'null'
+    ;
+
+BooleanLiteral
+    : 'true' | 'false'
+    ;
+
+NumericLiteral
+    : IntegerLiteral
+    | FloatLiteral
+    ;
+
+IntegerLiteral
+    : DecimalLiteral
+    | BinaryLiteral
+    | HexadecimalLiteral
+    ;
+
+DecimalLiteral
+    : \d ('''? \d)*
+    ;
+
+BinaryLiteral
+    : '0b' [01] ('''? [01])*
+    ;
+
+HexadecimalLiteral
+    : '0x' [0-9a-fA-F] ('''? [0-9a-fA-F])*
+    ;
+
+FloatLiteral
+    : \d ('''? \d)* '.' \d ('''? \d)*
+    ;
+
+CharacterLiteral
+    : ''' \w '''
+    ;
+
+TextLiteral
+    : '"' \w* '"'
+    ;
+
+RewTextLiteral
+    : 'r"' \w* '"'
+    ;
+
+TupleLiteral
+    : '(' ')'
+    | '(' Expression (',' Expression)* ')'
+    ;
+
+ListLiteral
+    : '[' ']'
+    | '[' Expression (',' Expression)* ']'
+    ;
+
+SetLiteral
+    : '{' '}'
+    | '{' Expression (',' Expression)* '}'
+    ;
+
+MapLiteral
+    : '{' ':' '}'
+    | '{' Expression ':' Expression (',' Expression ':' Expression)* '}'
+    ;
+
+RangeLiteral
+    : Expression? '..' Expression?
+    | Expression? '..=' Expression
     ;

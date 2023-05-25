@@ -33,6 +33,13 @@ extension Parser
                     LiteralToken: ConsumeToken(kind: .RawTextLiteral)
                 )
 
+            case .OpenParenthesis:
+                return try .CollectionLiteralExpression(
+                    OpenToken: ConsumeToken(kind: .OpenParenthesis),
+                    Expressions: Elements(),
+                    CloseToken: ConsumeToken(kind: .CloseParenthesis)
+                )
+
             case .OpenBracket:
                 return try .CollectionLiteralExpression(
                     OpenToken: ConsumeToken(kind: .OpenBracket),
@@ -42,13 +49,6 @@ extension Parser
 
             case .OpenBrace:
                 return try MapOrSetLiteral()
-
-            case .OpenParenthesis:
-                return try .CollectionLiteralExpression(
-                    OpenToken: ConsumeToken(kind: .OpenParenthesis),
-                    Expressions: Elements(),
-                    CloseToken: ConsumeToken(kind: .CloseParenthesis)
-                )
 
             default:
                 throw SyntaxError(

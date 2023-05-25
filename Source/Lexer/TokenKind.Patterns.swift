@@ -2,311 +2,345 @@ import RegexBuilder
 
 extension TokenKind
 {
-    static let patterns: [TokenKind : Regex<Substring>] = [
-        .Whitespace                         : Regex {
-                                                OneOrMore(.whitespace)
-                                            },
-
-        .EndOfLine                          : Regex {
-                                                Anchor.startOfLine ;
-                                                .newlineSequence
-                                            },
-
-        .SingleLineComment                  : Regex {
-                                                "//"
-                                                ZeroOrMore(.anyNonNewline)
-                                            },
-
-        .MultiLineComment                   : Regex {
-                                                "/*"
-                                                ZeroOrMore(.any, .eager)
-                                                "*/"
-                                            },
-
-        .DocumentationComment               : Regex {
-                                                OneOrMore {
-                                                    "///"
-                                                    ZeroOrMore(.anyNonNewline)
-                                                }
-                                            },
-
-        .Semicolon                          : Regex { ";" },
-
-        .Colon                              : Regex { ":" },
-
-        .Comma                              : Regex { "," },
-
-        .OpenParenthesis                    : Regex { "(" },
-
-        .CloseParenthesis                   : Regex { ")" },
-
-        .OpenBrace                          : Regex { "{" },
-
-        .CloseBrace                         : Regex { "}" },
-
-        .OpenBracket                        : Regex { "[" },
-
-        .CloseBracket                       : Regex { "]" },
-
-        .AtSign                             : Regex { "@" },
-
-        .Underscore                         : Regex {
-                                                Anchor.wordBoundary
-                                                "_"
-                                                Anchor.wordBoundary
-                                            },
-
-        .NullLiteral                        : Regex {
-                                                Anchor.wordBoundary
-                                                "null"
-                                                Anchor.wordBoundary
-                                            },
-
-        .BooleanLiteral                     : Regex {
-                                                Anchor.wordBoundary
-                                                ChoiceOf { "true" ; "false" }
-                                                Anchor.wordBoundary
-                                            },
-
-        .NumericLiteral                     : Regex {
-                                                OneOrMore(.digit)
-                                            },
-
-        .CharacterLiteral                   : Regex {
-                                                "'" ;
-                                                .any
-                                                "'"
-                                            },
-
-        .TextLiteral                        : Regex {
-                                                "\""
-                                                ZeroOrMore(.any, .reluctant)
-                                                "\""
-                                            },
-
-        .RawTextLiteral                     : Regex {
-                                                "r\""
-                                                ZeroOrMore(.any, .reluctant)
-                                                "\""
-                                            },
-
-        .EdgeKeyword                        : Regex {
-                                                Anchor.wordBoundary
-                                                "edge"
-                                                Anchor.wordBoundary
-                                            },
-
-        .VarKeyword                    : Regex {
-                                                Anchor.wordBoundary
-                                                "var"
-                                                Anchor.wordBoundary
-                                            },
-
-        .ConstKeyword                    : Regex {
-                                                Anchor.wordBoundary
-                                                "const"
-                                                Anchor.wordBoundary
-                                            },
-
-        .ProcedureKeyword                   : Regex {
-                                                Anchor.wordBoundary
-                                                "proc"
-                                                Anchor.wordBoundary
-                                            },
-
-        .TypeKeyword                        : Regex {
-                                                Anchor.wordBoundary
-                                                "type"
-                                                Anchor.wordBoundary
-                                            },
-
-        .ExtendKeyword                      : Regex {
-                                                Anchor.wordBoundary
-                                                "extend"
-                                                Anchor.wordBoundary
-                                            },
-
-        .InterfaceKeyword                   : Regex {
-                                                Anchor.wordBoundary
-                                                "interface"
-                                                Anchor.wordBoundary
-                                            },
-
-        .UnionKeyword                       : Regex {
-                                                Anchor.wordBoundary
-                                                "union"
-                                                Anchor.wordBoundary
-                                            },
-
-        .EnumKeyword                        : Regex {
-                                                Anchor.wordBoundary
-                                                "enum"
-                                                Anchor.wordBoundary
-                                            },
-
-        .IfKeyword                          : Regex {
-                                                Anchor.wordBoundary
-                                                "if"
-                                                Anchor.wordBoundary
-                                            },
-
-        .ElseKeyword                        : Regex {
-                                                Anchor.wordBoundary
-                                                "else"
-                                                Anchor.wordBoundary
-                                            },
-
-        .MatchKeyword                       : Regex {
-                                                Anchor.wordBoundary
-                                                "match"
-                                                Anchor.wordBoundary
-                                            },
-
-        .ForKeyword                         : Regex {
-                                                Anchor.wordBoundary
-                                                "for"
-                                                Anchor.wordBoundary
-                                            },
-
-        .WhileKeyword                       : Regex {
-                                                Anchor.wordBoundary
-                                                "while"
-                                                Anchor.wordBoundary
-                                            },
-
-        .LoopKeyword                        : Regex {
-                                                Anchor.wordBoundary
-                                                "loop"
-                                                Anchor.wordBoundary
-                                            },
-
-        .IsOperator                         : Regex {
-                                                Anchor.wordBoundary
-                                                "is"
-                                                Anchor.wordBoundary
-                                            },
-
-        .AsOperator                         : Regex {
-                                                Anchor.wordBoundary
-                                                "as"
-                                                Anchor.wordBoundary
-                                            },
-
-        .InOperator                         : Regex {
-                                                Anchor.wordBoundary
-                                                "in"
-                                                Anchor.wordBoundary
-                                            },
-
-        .ReturnOperator                     : Regex {
-                                                Anchor.wordBoundary
-                                                "return"
-                                                Anchor.wordBoundary
-                                            },
-
-        .BreakOperator                      : Regex {
-                                                Anchor.wordBoundary
-                                                "break"
-                                                Anchor.wordBoundary
-                                            },
-
-        .ContinueOperator                   : Regex {
-                                                Anchor.wordBoundary
-                                                "continue"
-                                                Anchor.wordBoundary
-                                            },
-
-        .PlusOperator                       : Regex { "+" },
-
-        .MinusOperator                      : Regex { "-" },
-
-        .MultiplyOperator                   : Regex { "*" },
-
-        .DivideOperator                     : Regex { "/" },
-
-        .ModuloOperator                     : Regex { "%" },
-
-        .PowerOperator                      : Regex { "**" },
-
-        .AssignOperator                     : Regex { "=" },
-
-        .PlusAssignOperator                 : Regex { "+=" },
-
-        .MinusAssignOperator                : Regex { "-=" },
-
-        .MultiplyAssignOperator             : Regex { "*=" },
-
-        .DivideAssignOperator               : Regex { "/=" },
-
-        .ModuloAssignOperator               : Regex { "%=" },
-
-        .PowerAssignOperator                : Regex { "**=" },
-
-        .BitwiseAndAssignOperator           : Regex { "&=" },
-
-        .BitwiseOrAssignOperator            : Regex { "|=" },
-
-        .BitwiseXorAssignOperator           : Regex { "^=" },
-
-        .BitwiseLeftShiftAssignOperator     : Regex { "<<=" },
-
-        .BitwiseRightShiftAssignOperator    : Regex { ">>=" },
-
-        .LogicalNotOperator                 : Regex { "!" },
-
-        .LogicalAndOperator                 : Regex { "&&" },
-
-        .LogicalOrOperator                  : Regex { "||" },
-
-        .BitwiseNotOperator                 : Regex { "~" },
-
-        .BitwiseAndOperator                 : Regex { "&" },
-
-        .BitwiseOrOperator                  : Regex { "|" },
-
-        .BitwiseXorOperator                 : Regex { "^" },
-
-        .BitwiseLeftShiftOperator           : Regex { "<<" },
-
-        .BitwiseRightShiftOperator          : Regex { ">>" },
-
-        .EqualOperator                      : Regex { "==" },
-
-        .NotEqualOperator                   : Regex { "!=" },
-
-        .LessThanOperator                   : Regex { "<" },
-
-        .LessThanOrEqualOperator            : Regex { "<=" },
-
-        .GreaterThanOperator                : Regex { ">" },
-
-        .GreaterThanOrEqualOperator         : Regex { ">=" },
-
-        .InclusiveRangeOperator             : Regex { ".." },
-
-        .ExclusiveRangeOperator             : Regex { "..<" },
-
-        .DotOperator                        : Regex { "." },
-
-        .NullableOperator                   : Regex { "?" },
-
-        .NullReduceOperator                 : Regex { "??" },
-
-        .Identifier                         : Regex {
-                                                Anchor.wordBoundary
-                                                One(.word)
-                                                ZeroOrMore {
-                                                    ChoiceOf {
-                                                        "_" ;
-                                                        .word ;
-                                                        .digit
-                                                    }
-                                                }
-                                                Anchor.wordBoundary
-                                            },
-    ]
-
     func Match(input: String) -> Regex<Substring>.Match? {
-        try! TokenKind.patterns[self]?.prefixMatch(in: input)
+        try! Pattern()?.prefixMatch(in: input)
+    }
+
+    func Pattern() -> Regex<Substring>? {
+        switch self {
+            case .Whitespace: return Regex {
+                OneOrMore(.whitespace)
+            }
+
+            case .EndOfLine: return Regex {
+                Anchor.startOfLine ;
+                .newlineSequence
+            }
+
+            case .SingleLineComment: return Regex {
+                "//"
+                ZeroOrMore(.anyNonNewline)
+            }
+
+            case .MultiLineComment: return Regex {
+                "/*"
+                ZeroOrMore(.any)
+                "*/"
+            }
+
+            case .DocumentationComment: return Regex {
+                OneOrMore {
+                    "///"
+                    ZeroOrMore(.anyNonNewline)
+                }
+            }
+
+            case .Semicolon: return Regex { ";" }
+
+            case .Colon: return Regex { ":" }
+
+            case .Comma: return Regex { "," }
+
+            case .OpenParenthesis: return Regex { "(" }
+
+            case .CloseParenthesis: return Regex { ")" }
+
+            case .OpenBrace: return Regex { "{" }
+
+            case .CloseBrace: return Regex { "}" }
+
+            case .OpenBracket: return Regex { "[" }
+
+            case .CloseBracket: return Regex { "]" }
+
+            case .AtSign: return Regex { "@" }
+
+            case .Underscore: return Regex {
+                Anchor.wordBoundary
+                "_"
+                Anchor.wordBoundary
+            }
+
+            case .NullLiteral: return Regex {
+                Anchor.wordBoundary
+                "null"
+                Anchor.wordBoundary
+            }
+
+            case .BooleanLiteral: return Regex {
+                Anchor.wordBoundary
+                ChoiceOf { "true" ; "false" }
+                Anchor.wordBoundary
+            }
+
+            case .NumericLiteral: return Regex {
+                OneOrMore(.digit)
+            }
+
+            case .CharacterLiteral: return Regex {
+                "'" ;
+                .any
+                "'"
+            }
+
+            case .TextLiteral: return Regex {
+                "\""
+                ZeroOrMore(.any, .reluctant)
+                "\""
+            }
+
+            case .RawTextLiteral: return Regex {
+                "r\""
+                ZeroOrMore(.any, .reluctant)
+                "\""
+            }
+
+            case .EdgeKeyword: return Regex {
+                Anchor.wordBoundary
+                "edge"
+                Anchor.wordBoundary
+            }
+
+            case .VarKeyword: return Regex {
+                Anchor.wordBoundary
+                "var"
+                Anchor.wordBoundary
+            }
+
+            case .ConstKeyword: return Regex {
+                Anchor.wordBoundary
+                "const"
+                Anchor.wordBoundary
+            }
+
+            case .ProcKeyword: return Regex {
+                Anchor.wordBoundary
+                "proc"
+                Anchor.wordBoundary
+            }
+
+            case .TypeKeyword: return Regex {
+                Anchor.wordBoundary
+                "type"
+                Anchor.wordBoundary
+            }
+
+            case .ExtendKeyword: return Regex {
+                Anchor.wordBoundary
+                "extend"
+                Anchor.wordBoundary
+            }
+
+            case .InterfaceKeyword: return Regex {
+                Anchor.wordBoundary
+                "interface"
+                Anchor.wordBoundary
+            }
+
+            case .UnionKeyword: return Regex {
+                Anchor.wordBoundary
+                "union"
+                Anchor.wordBoundary
+            }
+
+            case .EnumKeyword: return Regex {
+                Anchor.wordBoundary
+                "enum"
+                Anchor.wordBoundary
+            }
+
+            case .ModuleKeyword: return Regex {
+                Anchor.wordBoundary
+                "module"
+                Anchor.wordBoundary
+            }
+
+            case .IfKeyword: return Regex {
+                Anchor.wordBoundary
+                "if"
+                Anchor.wordBoundary
+            }
+
+            case .ElseKeyword: return Regex {
+                Anchor.wordBoundary
+                "else"
+                Anchor.wordBoundary
+            }
+
+            case .MatchKeyword: return Regex {
+                Anchor.wordBoundary
+                "match"
+                Anchor.wordBoundary
+            }
+
+            case .ForKeyword: return Regex {
+                Anchor.wordBoundary
+                "for"
+                Anchor.wordBoundary
+            }
+
+            case .WhileKeyword: return Regex {
+                Anchor.wordBoundary
+                "while"
+                Anchor.wordBoundary
+            }
+
+            case .LoopKeyword: return Regex {
+                Anchor.wordBoundary
+                "loop"
+                Anchor.wordBoundary
+            }
+
+            case .AsyncKeyword: return Regex {
+                Anchor.wordBoundary
+                "async"
+                Anchor.wordBoundary
+            }
+
+            case .IsOperator: return Regex {
+                Anchor.wordBoundary
+                "is"
+                Anchor.wordBoundary
+            }
+
+            case .AsOperator: return Regex {
+                Anchor.wordBoundary
+                "as"
+                Anchor.wordBoundary
+            }
+
+            case .InOperator: return Regex {
+                Anchor.wordBoundary
+                "in"
+                Anchor.wordBoundary
+            }
+
+            case .ReturnOperator: return Regex {
+                Anchor.wordBoundary
+                "return"
+                Anchor.wordBoundary
+            }
+
+            case .BreakOperator: return Regex {
+                Anchor.wordBoundary
+                "break"
+                Anchor.wordBoundary
+            }
+
+            case .ContinueOperator: return Regex {
+                Anchor.wordBoundary
+                "continue"
+                Anchor.wordBoundary
+            }
+
+            case .TryOperator: return Regex {
+                Anchor.wordBoundary
+                "try"
+                Anchor.wordBoundary
+            }
+
+            case .AwaitOperator: return Regex {
+                Anchor.wordBoundary
+                "await"
+                Anchor.wordBoundary
+            }
+
+            case .LambdaOperator: return Regex {
+                Anchor.wordBoundary
+                "=>"
+                Anchor.wordBoundary
+            }
+
+            case .PlusOperator: return Regex { "+" }
+
+            case .MinusOperator: return Regex { "-" }
+
+            case .MultiplyOperator: return Regex { "*" }
+
+            case .DivideOperator: return Regex { "/" }
+
+            case .ModuloOperator: return Regex { "%" }
+
+            case .PowerOperator: return Regex { "**" }
+
+            case .AssignOperator: return Regex { "=" }
+
+            case .PlusAssignOperator: return Regex { "+=" }
+
+            case .MinusAssignOperator: return Regex { "-=" }
+
+            case .MultiplyAssignOperator: return Regex { "*=" }
+
+            case .DivideAssignOperator: return Regex { "/=" }
+
+            case .ModuloAssignOperator: return Regex { "%=" }
+
+            case .PowerAssignOperator: return Regex { "**=" }
+
+            case .BitwiseAndAssignOperator: return Regex { "&=" }
+
+            case .BitwiseOrAssignOperator: return Regex { "|=" }
+
+            case .BitwiseXorAssignOperator: return Regex { "^=" }
+
+            case .BitwiseLeftShiftAssignOperator: return Regex { "<<=" }
+
+            case .BitwiseRightShiftAssignOperator: return Regex { ">>=" }
+
+            case .LogicalNotOperator: return Regex { "!" }
+
+            case .LogicalAndOperator: return Regex { "&&" }
+
+            case .LogicalOrOperator: return Regex { "||" }
+
+            case .BitwiseNotOperator: return Regex { "~" }
+
+            case .BitwiseAndOperator: return Regex { "&" }
+
+            case .BitwiseOrOperator: return Regex { "|" }
+
+            case .BitwiseXorOperator: return Regex { "^" }
+
+            case .BitwiseLeftShiftOperator: return Regex { "<<" }
+
+            case .BitwiseRightShiftOperator: return Regex { ">>" }
+
+            case .EqualOperator: return Regex { "==" }
+
+            case .NotEqualOperator: return Regex { "!=" }
+
+            case .LessThanOperator: return Regex { "<" }
+
+            case .LessThanOrEqualOperator: return Regex { "<=" }
+
+            case .GreaterThanOperator: return Regex { ">" }
+
+            case .GreaterThanOrEqualOperator: return Regex { ">=" }
+
+            case .DotOperator: return Regex { "." }
+
+            case .NullableOperator: return Regex { "?" }
+
+            case .NullReduceOperator: return Regex { "??" }
+
+            case .ExclusiveRangeOperator: return Regex { ".." }
+
+            case .InclusiveRangeOperator: return Regex { "..=" }
+
+            case .Identifier: return Regex {
+                Anchor.wordBoundary
+                One(.word)
+                ZeroOrMore {
+                    ChoiceOf {
+                        "_"     ;
+                        .word   ;
+                        .digit  ;
+                    }
+                }
+                Anchor.wordBoundary
+            }
+
+            case .EndOfFile: return nil
+        }
     }
 }

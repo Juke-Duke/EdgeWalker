@@ -33,13 +33,14 @@ enum TokenKind : String, Codable
     case EdgeKeyword
     case VarKeyword
     case ConstKeyword
-    case ProcedureKeyword
+    case ProcKeyword
     case TypeKeyword
     case ExtendKeyword
     case InterfaceKeyword
     case UnionKeyword
     case EnumKeyword
     case ModuleKeyword
+    case AsyncKeyword
 
     // Keywords - Control Flow
     case IfKeyword
@@ -58,6 +59,11 @@ enum TokenKind : String, Codable
     case ReturnOperator
     case BreakOperator
     case ContinueOperator
+    case TryOperator
+    case AwaitOperator
+
+    // Operators - Lambda
+    case LambdaOperator
 
     // Operators - Additive
     case PlusOperator

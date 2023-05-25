@@ -1,4 +1,4 @@
-struct Token : Codable, Hashable
+struct Token : Codable
 {
     let Kind: TokenKind
 

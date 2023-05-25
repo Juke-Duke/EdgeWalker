@@ -1,5 +1,63 @@
 indirect enum Expression : Codable
 {
+    case Program(
+        EdgeDeclarations: [Expression],
+        AliasDeclarations: [Expression],
+        ProcedureBody: [Expression]
+    )
+
+    case Library(
+        EdgeDeclarations: [Expression],
+        AliasDeclarations: [Expression],
+        ModuleDeclarations: [Expression]
+    )
+
+    case EdgeDeclaration(
+        EdgeKeywordToken: Token,
+        Path: Expression,
+        SemicolonToken: Token
+    )
+
+    case AliasDeclaration(
+        AliasKeywordToken: Token,
+        IdentifierToken: Token,
+        AssignOperatorToken: Token,
+        Path: Expression,
+        SemicolonToken: Token
+    )
+
+    case Path(
+        ModuleFullPath: [Expression],
+        DotOperatorToken: Token?,
+        IdentifierToken: Token,
+        OpenAngleBracketToken: Token?,
+        Commas: [Token],
+        CloseAngleBracketToken: Token?
+    )
+
+    case Identifier(IdentifierToken: Token)
+
+    case ModulePath(
+        IdentifierToken: Token,
+        SlashToken: Token?
+    )
+
+    case TypePath(
+        ModuleFullPath: [Expression],
+        DotOperatorToken: Token?,
+        IdentifierToken: Token,
+        OpenAngleBracketToken: Token?,
+        TypeArguments: [Token],
+        CloseAngleBracketToken: Token?
+    )
+
+    case Type(
+        IdentifierToken: Token,
+        OpenAngleBracketToken: Token?,
+        TypeArguments: [Expression],
+        CloseAngleBracketToken: Token?
+    )
+
     case LiteralExpression(LiteralToken: Token)
 
     case CollectionLiteralExpression(
@@ -20,7 +78,11 @@ indirect enum Expression : Codable
         CommaToken: Token?
     )
 
-    case IdentifierExpression(IdentifierToken: Token)
+    case RangeLiteral(
+        LeftBoundExpression: Expression?,
+        RangeOperatorToken: Token,
+        RightBoundExpression: Expression?
+    )
 
     case BinaryExpression(
         LeftExpression: Expression,
@@ -56,12 +118,6 @@ indirect enum Expression : Codable
         CloseBracketToken: Token
     )
 
-    case RangeExpression(
-        LeftBoundExpression: Expression?,
-        RangeOperatorToken: Token,
-        RightBoundExpression: Expression?
-    )
-
     case ExclusiveRangeExpression(
         LeftBoundExpression: Expression?,
         ExlusiveRangeOperator: Token,
@@ -87,7 +143,7 @@ indirect enum Expression : Codable
         CommaToken: Token?
     )
 
-    case AttributeExpression(
+    case Attribute(
         AtSignToken: Token,
         IdentifierToken: Token,
         OpenParenthesisToken: Token?,
@@ -95,7 +151,7 @@ indirect enum Expression : Codable
         CloseParenthesisToken: Token?
     )
 
-    case VariableDeclarationExpression(
+    case VariableDeclaration(
         VarKeywordToken: Token,
         IdentifierToken: Token,
         ColonToken: Token?,
@@ -105,7 +161,7 @@ indirect enum Expression : Codable
         SemicolonToken: Token
     )
 
-    case VariableDeconstructionDeclarationExpression(
+    case VariableDeconstruction(
         VarKeywordToken: Token,
         OpenParenthesisToken: Token,
         IdentifierTokens: [Token],
@@ -114,7 +170,7 @@ indirect enum Expression : Codable
         TupleLiteralExpression: Expression
     )
 
-    case ConstantDeclarationExpression(
+    case ConstantDeclaration(
         ConstKeywordToken: Token,
         IdentifierToken: Token,
         ColonToken: Token?,
@@ -122,5 +178,26 @@ indirect enum Expression : Codable
         AssignOperatorToken: Token,
         InitializerExpression: Expression,
         SemicolonToken: Token
+    )
+
+    case ProcedureDeclaration(
+        Attributes: [Expression],
+        ProcKeywordToken: Token,
+        IdentifierToken: Token,
+        OpenAngleBracketToken: Token?,
+        TypeParameters: [Expression],
+        CloseAngleBracketToken: Token?,
+        OpenParenthesisToken: Token,
+        Parameters: [Expression],
+        CloseParenthesisToken: Token,
+        LambdaOperatorToken: Token?,
+        Expression: Expression?
+    )
+
+    case TypeParameter(
+        Attributes: [Expression],
+        IdentifierToken: Token,
+        ColonToken: Token?,
+        TypeCnstraints: [Expression]
     )
 }
